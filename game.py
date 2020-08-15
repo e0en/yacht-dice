@@ -7,94 +7,61 @@ from typing import Iterable, List, Dict, Tuple
 import dice
 
 
-ScoreItem = namedtuple('ScoreItem', ['score', 'is_filled'])
-
-
 class ScoreBoard:
     def __init__(self):
-        self.scores: Dict[str, ScoreItem] = {
-            'aces': ScoreItem(0, False),
-            'deuces': ScoreItem(0, False),
-            'threes': ScoreItem(0, False),
-            'fours': ScoreItem(0, False),
-            'fives': ScoreItem(0, False),
-            'sixes': ScoreItem(0, False),
-            'choice': ScoreItem(0, False),
-            'four_of_a_kind': ScoreItem(0, False),
-            'full_house': ScoreItem(0, False),
-            'small_straight': ScoreItem(0, False),
-            'large_straight': ScoreItem(0, False),
-            'yacht': ScoreItem(0, False),
-        }
-        self.upper_names = \
-            ['aces', 'deuces', 'threes', 'fours', 'fives', 'sixes']
-        self.field_names = list(self.scores.keys())
+        self.fields: List[dice.Field] = [
+            dice.Aces(),
+            dice.Deuces(),
+            dice.Threes(),
+            dice.Fours(),
+            dice.Fives(),
+            dice.Sixes(),
+            dice.Choice(),
+            dice.FullHouse(),
+            dice.FourOfAKind(),
+            dice.SmallStraight(),
+            dice.LargeStraight(),
+            dice.Yacht(),
+
+        ]
+        self.upper_idx = [0, 1, 2, 3, 4, 5]
+        self.lower_idx = [6, 7, 8, 9, 10, 11]
         self.bonus: int = 0
 
-    def register_score(self, dices: List[int], name: str):
-        if self.scores[name].is_filled:
-            raise RuntimeError(f'Field {name} is already filled')
-        score = self.calc_score(dices, name)
-        self.scores[name] = ScoreItem(score, True)
+    def register(self, dices: List[int], field_idx: int):
+        field = self.fields[field_idx]
+        if field.is_filled:
+            raise RuntimeError(f'Field {field.name} is already filled')
+        field.register_dice(dices)
         self.bonus = self.calc_bonus()
 
     def calc_bonus(self) -> int:
-        bonus_fields = ['aces', 'deuces', 'threes', 'fours', 'fives', 'sixes']
-        upper_sum = sum([self.scores[x].score for x in bonus_fields])
+        upper_sum = sum([self.fields[i].score for i in self.upper_idx])
         if upper_sum >= 63:
             return 35
         return 0
-
-    @staticmethod
-    def calc_score(dices: List[int], name: str) -> int:
-        if name == 'aces':
-            return dice.calc_upper_score(1, dices)
-        elif name == 'deuces':
-            return dice.calc_upper_score(2, dices)
-        elif name == 'threes':
-            return dice.calc_upper_score(3, dices)
-        elif name == 'fours':
-            return dice.calc_upper_score(4, dices)
-        elif name == 'fives':
-            return dice.calc_upper_score(5, dices)
-        elif name == 'sixes':
-            return dice.calc_upper_score(6, dices)
-        elif name == 'choice':
-            return sum(dices)
-        elif name == 'full_house':
-            return int(dice.is_full_house(dices)) * sum(dices)
-        elif name == 'four_of_a_kind':
-            return(dice.is_four_of_a_kind(dices)) * sum(dices)
-        elif name == 'small_straight':
-            return int(dice.is_small_straight(dices)) * 15
-        elif name == 'large_straight':
-            return int(dice.is_large_straight(dices)) * 30
-        elif name == 'yacht':
-            return int(dice.is_yacht(dices)) * 50
-        else:
-            raise ValueError(f'Unknown name {name}')
 
     def to_str(self):
         lines = list()
 
         upper_sum = 0
-        for name in self.upper_names:
-            s = self.scores[name]
-            upper_sum += s.score
-            lines.append(f'{name}\t{s.score}')
+        for i in self.upper_idx:
+            f = self.fields[i]
+            upper_sum += f.score
+            lines.append(f'{f.name}\t{f.score}')
         lines.append('----------------------------')
         lines.append(f'upper sum = {upper_sum}')
         lines.append(f'bonus = {self.bonus}')
         lines.append('----------------------------')
-        for name, s in self.scores.items():
-            if name not in self.upper_names:
-                lines.append(f'{name}\t{s.score}')
+        for i in self.lower_idx:
+            f = self.fields[i]
+            lines.append(f'{f.name}\t{f.score}')
         lines.append('----------------------------')
         lines.append(f'total = {self.calc_total_score()}')
         return '\n'.join(lines)
 
     def calc_total_score(self):
-        return self.bonus + sum([s.score for s in self.scores.values()])
+        return self.bonus + sum([f.score for f in self.fields])
 
 
 def show_dices(dices: List[int], fix_idx: List[int]) -> str:
@@ -139,14 +106,14 @@ def ask_re_roll() -> bool:
             print('wrong input')
 
 
-def choose_name(board: ScoreBoard, dices: List[int]) -> str:
+def choose_field(board: ScoreBoard, dices: List[int]) -> int:
     scores = list()
-    for name in board.field_names:
-        if not board.scores[name].is_filled:
-            scores.append((name, board.calc_score(dices, name)))
+    for i, f in enumerate(board.fields):
+        if not f.is_filled:
+            scores.append((i, f.calc_score(dices)))
 
-    for i, (n, s) in enumerate(scores):
-        print(f'{i + 1}) {n} ({s} points)')
+    for i_score, (i, s) in enumerate(scores):
+        print(f'{i_score + 1}. {board.fields[i].name} ({s} points)')
 
     while True:
         idx = input(f'Choose a field name ([1~{len(scores)}]): ')
@@ -171,7 +138,7 @@ if __name__ == '__main__':
             if i_draw == 2 or not ask_re_roll():
                 break
             fix_idx = choose_fix_dices(dices, fix_idx)
-        name = choose_name(board, dices)
-        print(dices, name)
-        board.register_score(dices, name)
+        field_idx = choose_field(board, dices)
+        print(dices)
+        board.register(dices, field_idx)
     print(board.to_str())
