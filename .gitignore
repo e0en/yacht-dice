@@ -1,3 +1,6 @@
 __pycache__/*
 *.py[cod]
 .python-version
+/node_modules/*
+/dist/*
+package-lock.json
