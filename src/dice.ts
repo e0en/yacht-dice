@@ -129,3 +129,8 @@ class Yacht extends Field {
 function roll(): number {
     return Math.floor(Math.random() * 6) + 1;
 }
+
+export {
+    Field, Aces, Deuces, Threes, Fours, Fives, Sixes, Choice, FullHouse,
+    FourOfAKind, SmallStraight, LargeStraight, Yacht, roll
+};
