@@ -1,19 +1,19 @@
-import * as dice from './dice';
+import * as rule from './rule';
 
 class ScoreBoard {
-    fields: Array<dice.Field> = [
-        new dice.Aces(),
-        new dice.Deuces(),
-        new dice.Threes(),
-        new dice.Fours(),
-        new dice.Fives(),
-        new dice.Sixes(),
-        new dice.Choice(),
-        new dice.FullHouse(),
-        new dice.FourOfAKind(),
-        new dice.SmallStraight(),
-        new dice.LargeStraight(),
-        new dice.Yacht(),
+    fields: Array<rule.Field> = [
+        new rule.Aces(),
+        new rule.Deuces(),
+        new rule.Threes(),
+        new rule.Fours(),
+        new rule.Fives(),
+        new rule.Sixes(),
+        new rule.Choice(),
+        new rule.FullHouse(),
+        new rule.FourOfAKind(),
+        new rule.SmallStraight(),
+        new rule.LargeStraight(),
+        new rule.Yacht(),
     ];
     upper_idx: Array<number> = [0, 1, 2, 3, 4, 5];
     lower_idx: Array<number> = [6, 7, 8, 9, 10, 11];

@@ -1,7 +1,7 @@
 abstract class Field {
-    score: number;
-    is_filled: boolean;
-    name: string;
+    score: number = 0;
+    is_filled: boolean = false;
+    name!: string;
     abstract calc_score(dices: Array<number>): number;
 
     register_dice(dices: Array<number>): void {
@@ -14,7 +14,7 @@ abstract class Field {
 }
 
 abstract class Upper extends Field {
-    protected face: number;
+    protected face!: number;
 
     calc_score(dices: Array<number>): number {
         return dices.filter(d => d == this.face).reduce((sum, d) => sum + d);
@@ -66,7 +66,7 @@ class FullHouse extends Field {
             counts[x - 1] += 1;
         }
 
-        if (counts.includes(2) && counts.includes(3)) {
+        if ((-1 != counts.indexOf(2)) && (-1 != counts.indexOf(3))) {
             return dices.reduce((sum, d) => sum + d);
         }
         return 0;
@@ -96,7 +96,7 @@ class SmallStraight extends Field {
             [3, 4, 5, 6],
         ]
         for (const straight of straights) {
-            if (straight.every(n => dices.includes(n))) {
+            if (straight.every(n => -1 != dices.indexOf(n))) {
                 return 15;
             }
         }
