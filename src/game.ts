@@ -39,3 +39,5 @@ function roll_a_dice(): number {
     return Math.floor(Math.random() * 6) + 1;
 }
 
+
+export { ScoreBoard, roll_a_dice };
