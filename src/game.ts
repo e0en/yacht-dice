@@ -33,3 +33,9 @@ class ScoreBoard {
         return 0;
     }
 }
+
+
+function roll_a_dice(): number {
+    return Math.floor(Math.random() * 6) + 1;
+}
+

@@ -149,5 +149,3 @@ class Yacht(Field):
         return 0
 
 
-def roll() -> int:
-    return randint(1, 6)

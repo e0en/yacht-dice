@@ -4,24 +4,24 @@ from random import randint
 from collections import namedtuple
 from typing import Iterable, List, Dict, Tuple
 
-import dice
+import rule
 
 
 class ScoreBoard:
     def __init__(self):
-        self.fields: List[dice.Field] = [
-            dice.Aces(),
-            dice.Deuces(),
-            dice.Threes(),
-            dice.Fours(),
-            dice.Fives(),
-            dice.Sixes(),
-            dice.Choice(),
-            dice.FullHouse(),
-            dice.FourOfAKind(),
-            dice.SmallStraight(),
-            dice.LargeStraight(),
-            dice.Yacht(),
+        self.fields: List[rule.Field] = [
+            rule.Aces(),
+            rule.Deuces(),
+            rule.Threes(),
+            rule.Fours(),
+            rule.Fives(),
+            rule.Sixes(),
+            rule.Choice(),
+            rule.FullHouse(),
+            rule.FourOfAKind(),
+            rule.SmallStraight(),
+            rule.LargeStraight(),
+            rule.Yacht(),
 
         ]
         self.upper_idx = [0, 1, 2, 3, 4, 5]
@@ -62,6 +62,10 @@ class ScoreBoard:
 
     def calc_total_score(self):
         return self.bonus + sum([f.score for f in self.fields])
+
+
+def roll_a_dice() -> int:
+    return randint(1, 6)
 
 
 def show_dices(dices: List[int], fix_idx: List[int]) -> str:
@@ -130,9 +134,10 @@ if __name__ == '__main__':
         print(f'# Turn {i_turn + 1}')
         print(board.to_str())
         fix_idx = list()
-        dices = [dice.roll() for _ in range(5)]
+        dices = [roll_a_dice() for _ in range(5)]
         for i_draw in range(3):
-            dices = [x if i in fix_idx else dice.roll() for i, x in enumerate(dices)]
+            dices = [x if i in fix_idx else roll_a_dice()
+                     for i, x in enumerate(dices)]
             print(f'\n## draw {i_draw + 1}')
             print(show_dices(dices, fix_idx))
             if i_draw == 2 or not ask_re_roll():
